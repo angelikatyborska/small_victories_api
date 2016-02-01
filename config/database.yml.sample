@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+
+development:
+  <<: *default
+  database: small_victories_development
+  host: localhost
+
+test:
+  <<: *default
+  database: small_victories_test
+  host: localhost
+
+production:
+  <<: *default
+  database: small_victories_production
+  username: small_victories
+  password: <%= ENV['SMALL_VICTORIES_DATABASE_PASSWORD'] %>
