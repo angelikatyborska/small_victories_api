@@ -1,10 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::VictoriesController do
-  describe '#index' do
+  describe 'GET #index' do
     let!(:victories) { create_list :victory, 5 }
 
-    subject { get :index }
+    subject { xhr :get, :index }
 
     it 'returns a 200 response status' do
       expect(subject.status).to eq 200
@@ -15,17 +15,19 @@ RSpec.describe Api::V1::VictoriesController do
     end
   end
 
-  describe '#show' do
+  describe 'GET #show' do
     context 'victory doesn\'t exist' do
-      subject { get :show, id: 0 }
+      subject { xhr :get, :show, id: 0 }
 
-      it_behaves_like 'not found'
+      it 'returns a 404 response status' do
+        expect(subject.status).to eq 404
+      end
     end
 
     context 'factory exists'
     let!(:victory) { create :victory }
 
-    subject { get :show, id: victory.id }
+    subject { xhr :get, :show, id: victory.id }
 
     it 'returns a 200 response status' do
       expect(subject.status).to eq 200
@@ -42,15 +44,15 @@ RSpec.describe Api::V1::VictoriesController do
     end
   end
 
-  describe '#create' do
+  describe 'POST #create' do
     let!(:user) { create :user }
+
+    before :each do
+      authorize_request(user)
+    end
 
     context 'for the same user' do
       context 'with valid params' do
-        before :each do
-          authorize_request(user)
-        end
-
         subject { xhr :post, :create, victory: { user_id: user.id, body: 'Lorem ipsum.' } }
 
         it 'returns a 200 response status' do
@@ -62,10 +64,6 @@ RSpec.describe Api::V1::VictoriesController do
         end
 
         context 'with invalid params' do
-          before :each do
-            authorize_request(user)
-          end
-
           subject { xhr :post, :create, victory: { user_id: user.id } }
 
           it 'returns a 422 response status' do
@@ -87,7 +85,52 @@ RSpec.describe Api::V1::VictoriesController do
 
         subject { xhr :post, :create, victory: { user_id: another_user.id, body: 'Lorem ipsum.' } }
 
-        it_behaves_like 'not found'
+        it 'returns a 403 response status' do
+          expect(subject.status).to eq 403
+        end
+      end
+    end
+  end
+
+  describe 'DELETE #destroy' do
+    let!(:user) { create :user }
+
+    before :each do
+      authorize_request(user)
+    end
+
+    context 'victory doesn\'t exist' do
+      subject { xhr :delete, :destroy, id: 0 }
+
+      it 'returns a 404 response status' do
+        expect(subject.status).to eq 404
+      end
+    end
+
+    context 'victory exists' do
+      context 'for the same user' do
+        let!(:victory) { create :victory, user: user }
+
+        subject { xhr :delete, :destroy, id: victory.id }
+
+        it 'returns a 204 response status' do
+          expect(subject.status).to eq 204
+        end
+
+        it 'deletes the victory' do
+          expect { subject }.to change(Victory, :count).by(-1)
+        end
+      end
+
+      context 'for another user' do
+        let!(:another_user) { create :user }
+        let!(:victory) { create :victory, user: another_user }
+
+        subject { xhr :delete, :destroy, id: victory.id }
+
+        it 'returns a 403 response status' do
+          expect(subject.status).to eq 403
+        end
       end
     end
   end

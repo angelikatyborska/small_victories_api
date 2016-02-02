@@ -28,6 +28,16 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
     end
   end
 
+  def destroy
+    @victory = Victory.find(params[:id])
+
+    if authorize_user!(@victory.user)
+      @victory.destroy
+
+      head :no_content
+    end
+  end
+
   private
 
   def victory_params
@@ -37,8 +47,8 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
   def authorize_user!(user)
     return true if user_signed_in? && current_user == user
 
-    # TODO: 404 or 401 - which one should be here?
-    not_found
+    head 403
+
     false
   end
 end

@@ -6,7 +6,7 @@ Rails.application.routes.draw do
       mount_devise_token_auth_for 'User', at: 'auth'
 
       resources :users, only: [:index, :show]
-      resources :victories, only: [:index, :show, :create]
+      resources :victories, only: [:index, :show, :create, :destroy]
     end
   end
 end

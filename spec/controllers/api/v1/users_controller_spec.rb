@@ -2,7 +2,7 @@ RSpec.describe Api::V1::UsersController do
   describe '#index' do
     let!(:users) { create_list :user, 3 }
 
-    subject { get :index }
+    subject { xhr :get, :index }
 
     it 'returns a 200 response status' do
       expect(subject.status).to eq 200
@@ -15,15 +15,17 @@ RSpec.describe Api::V1::UsersController do
 
   describe '#show' do
     context 'user doesn\'t exist' do
-      subject { get :show, id: 0 }
+      subject { xhr :get, :show, id: 0 }
 
-      it_behaves_like 'not found'
+      it 'returns a 404 response status' do
+        expect(subject.status).to eq 404
+      end
     end
 
     context 'user exists' do
       let!(:user) { create :user }
 
-      subject { get :show, id: user.id }
+      subject { xhr :get, :show, id: user.id }
 
       it 'returns a 200 response status' do
         expect(subject.status).to eq 200
