@@ -6,7 +6,7 @@ RSpec.describe Api::V1::VictoriesController do
 
     subject { get :index }
 
-    it 'returns a successful 200 response' do
+    it 'returns a 200 response status' do
       expect(subject.status).to eq 200
     end
 
@@ -20,13 +20,7 @@ RSpec.describe Api::V1::VictoriesController do
     context 'victory doesn\'t exist' do
       subject { get :show, id: 0 }
 
-      it 'returns a 404 response' do
-        expect(subject.status).to eq 404
-      end
-
-      it 'returns not found' do
-        expect(subject.body).to eq({ errors: ['Not found.'] }.to_json)
-      end
+      it_behaves_like 'not found'
     end
 
     context 'factory exists'
@@ -34,7 +28,7 @@ RSpec.describe Api::V1::VictoriesController do
 
     subject { get :show, id: victory.id }
 
-    it 'returns a successful 200 response' do
+    it 'returns a 200 response status' do
       expect(subject.status).to eq 200
     end
 
@@ -46,6 +40,60 @@ RSpec.describe Api::V1::VictoriesController do
           body: victory.body
         }
       }.to_json)
+    end
+  end
+
+  describe '#create' do
+    let!(:user) { create :user }
+
+    context 'with invalid params' do
+      before :each do
+        sign_in user
+        auth_headers = user.create_new_auth_token
+        request.headers.merge!(auth_headers)
+      end
+
+      subject { xhr :post, :create, victory: { user_id: user.id } }
+
+      it 'returns a 422 response status' do
+        expect(subject.status).to eq 422
+      end
+
+      it 'returns errors' do
+        expect(subject.body).to eq({
+          errors: [
+            { body: [ 'can\'t be blank' ] }
+          ]
+        }.to_json)
+      end
+    end
+
+    context 'with valid params' do
+      context 'for the same user' do
+        before :each do
+          sign_in user
+          auth_headers = user.create_new_auth_token
+          request.headers.merge!(auth_headers)
+        end
+
+        subject { xhr :post, :create, victory: { user_id: user.id, body: 'Lorem ipsum.' } }
+
+        it 'returns a 200 response status' do
+          expect(subject.status).to eq 200
+        end
+
+        it 'creates a new victory' do
+          expect { subject }.to change(Victory, :count).by(1)
+        end
+      end
+
+      context 'for another user' do
+        let!(:another_user) { create :user }
+
+        subject { xhr :post, :create, victory: { user_id: another_user.id, body: 'Lorem ipsum.' } }
+
+        it_behaves_like 'not found'
+      end
     end
   end
 end

@@ -4,7 +4,7 @@ RSpec.describe Api::V1::UsersController do
 
     subject { get :index }
 
-    it 'returns a successful 200 response' do
+    it 'returns a 200 response status' do
       expect(subject.status).to eq 200
     end
 
@@ -18,13 +18,7 @@ RSpec.describe Api::V1::UsersController do
     context 'user doesn\'t exist' do
       subject { get :show, id: 0 }
 
-      it 'returns a 404 response' do
-        expect(subject.status).to eq 404
-      end
-
-      it 'returns not found' do
-        expect(subject.body).to eq({ errors: ['Not found.'] }.to_json)
-      end
+      it_behaves_like 'not found'
     end
 
     context 'user exists' do
@@ -32,7 +26,7 @@ RSpec.describe Api::V1::UsersController do
 
       subject { get :show, id: user.id }
 
-      it 'returns a successful 200 response' do
+      it 'returns a 200 response status' do
         expect(subject.status).to eq 200
       end
 

@@ -10,7 +10,7 @@ class Api::V1::ApplicationController < ActionController::API
   end
 
   def not_found
-    api_error(status: 404, errors: 'Not found.')
+    api_error(status: 404, errors: ['Not found.'])
   end
 
   def api_error(status: 500, errors: [])
@@ -21,14 +21,7 @@ class Api::V1::ApplicationController < ActionController::API
     if errors.empty?
       head status: status
     else
-      errors_json =
-        if errors.is_a? String
-          { errors: [errors] }
-        else
-          ActiveModel::ArraySerializer.new(errors, root: 'errors').to_json
-        end
-
-      render json: errors_json, status: status
+      render json: { errors: errors }, status: status
     end
   end
 end

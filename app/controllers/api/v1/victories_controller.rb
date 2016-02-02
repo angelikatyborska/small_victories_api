@@ -1,6 +1,4 @@
 class Api::V1::VictoriesController < Api::V1::ApplicationController
-  before_action :authorize_user!, only: [:create, :destroy, :update]
-
   def index
     @victories = Victory.all
 
@@ -17,16 +15,30 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
     render json: Api::V1::VictorySerializer.new(@victory).to_json
   end
 
+  def create
+    @victory = Victory.new(victory_params)
+
+    if authorize_user!(@victory.user)
+      if @victory.save
+        # TODO: this or redirect to show?
+        render json: Api::V1::VictorySerializer.new(@victory).to_json
+      else
+        render json: Api::V1::ErrorsSerializer.new(@victory.errors).to_json, status: 422
+      end
+    end
+  end
+
   private
 
   def victory_params
     params.require(:victory).permit(:user_id, :body)
   end
 
-  def authorize_user!
-    return true if user_signed_in? && victory.user && current_user == victory.user
+  def authorize_user!(user)
+    return true if user_signed_in? && current_user == user
 
-    # 404 or 401 - which one should be here?
+    # TODO: 404 or 401 - which one should be here?
     not_found
+    false
   end
 end
