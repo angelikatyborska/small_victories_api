@@ -1,4 +1,19 @@
 RSpec.describe Api::V1::UsersController do
+  describe '#index' do
+    let!(:users) { create_list :user, 3 }
+
+    subject { get :index }
+
+    it 'returns a successful 200 response' do
+      expect(subject.status).to eq 200
+    end
+
+    it 'returns all users' do
+      parsed_response = JSON.parse(subject.body)
+      expect(parsed_response['users'].length).to eq users.length
+    end
+  end
+
   describe '#show' do
     context 'user doesn\'t exist' do
       subject { get :show, id: 0 }
@@ -12,14 +27,19 @@ RSpec.describe Api::V1::UsersController do
 
       subject { get :show, id: user.id }
 
-      it { expect(subject.status).to eq 200 }
-      it { expect(subject.body).to eq({
-        user: {
-          id: user.id,
-          email: user.email,
-          nickname: user.nickname
-        }
-      }.to_json) }
+      it 'returns a successful 200 response' do
+        expect(subject.status).to eq 200
+      end
+
+      it 'returns the user' do
+        expect(subject.body).to eq({
+          user: {
+            id: user.id,
+            email: user.email,
+            nickname: user.nickname
+          }
+        }.to_json)
+      end
     end
   end
 end
