@@ -11,8 +11,7 @@ RSpec.describe Api::V1::VictoriesController do
     end
 
     it 'returns all victories' do
-      parsed_response = JSON.parse(subject.body)
-      expect(parsed_response['victories'].length).to eq victories.length
+      expect(JSON.parse(subject.body)['victories'].length).to eq victories.length
     end
   end
 
@@ -46,34 +45,10 @@ RSpec.describe Api::V1::VictoriesController do
   describe '#create' do
     let!(:user) { create :user }
 
-    context 'with invalid params' do
-      before :each do
-        sign_in user
-        auth_headers = user.create_new_auth_token
-        request.headers.merge!(auth_headers)
-      end
-
-      subject { xhr :post, :create, victory: { user_id: user.id } }
-
-      it 'returns a 422 response status' do
-        expect(subject.status).to eq 422
-      end
-
-      it 'returns errors' do
-        expect(subject.body).to eq({
-          errors: [
-            { body: [ 'can\'t be blank' ] }
-          ]
-        }.to_json)
-      end
-    end
-
-    context 'with valid params' do
-      context 'for the same user' do
+    context 'for the same user' do
+      context 'with valid params' do
         before :each do
-          sign_in user
-          auth_headers = user.create_new_auth_token
-          request.headers.merge!(auth_headers)
+          authorize_request(user)
         end
 
         subject { xhr :post, :create, victory: { user_id: user.id, body: 'Lorem ipsum.' } }
@@ -84,6 +59,26 @@ RSpec.describe Api::V1::VictoriesController do
 
         it 'creates a new victory' do
           expect { subject }.to change(Victory, :count).by(1)
+        end
+
+        context 'with invalid params' do
+          before :each do
+            authorize_request(user)
+          end
+
+          subject { xhr :post, :create, victory: { user_id: user.id } }
+
+          it 'returns a 422 response status' do
+            expect(subject.status).to eq 422
+          end
+
+          it 'returns errors' do
+            expect(subject.body).to eq({
+              errors: [
+                { body: [ 'can\'t be blank' ] }
+              ]
+            }.to_json)
+          end
         end
       end
 

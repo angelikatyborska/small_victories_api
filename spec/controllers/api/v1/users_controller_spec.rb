@@ -9,8 +9,7 @@ RSpec.describe Api::V1::UsersController do
     end
 
     it 'returns all users' do
-      parsed_response = JSON.parse(subject.body)
-      expect(parsed_response['users'].length).to eq users.length
+      expect(JSON.parse(subject.body)['users'].length).to eq users.length
     end
   end
 
