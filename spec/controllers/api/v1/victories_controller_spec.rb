@@ -25,7 +25,7 @@ RSpec.describe Api::V1::VictoriesController do
       end
 
       it 'returns not found' do
-        expect(subject.body).to eq 'Not found'.to_json
+        expect(subject.body).to eq({ errors: ['Not found.'] }.to_json)
       end
     end
 

@@ -1,4 +1,6 @@
 class Api::V1::ApplicationController < ActionController::API
+  include DeviseTokenAuth::Concerns::SetUserByToken
+
   before_action :destroy_session
 
   rescue_from ActiveRecord::RecordNotFound, with: :not_found
@@ -8,7 +10,7 @@ class Api::V1::ApplicationController < ActionController::API
   end
 
   def not_found
-    api_error(status: 404, errors: 'Not found')
+    api_error(status: 404, errors: 'Not found.')
   end
 
   def api_error(status: 500, errors: [])
@@ -19,7 +21,14 @@ class Api::V1::ApplicationController < ActionController::API
     if errors.empty?
       head status: status
     else
-      render json: errors.to_json, status: status
+      errors_json =
+        if errors.is_a? String
+          { errors: [errors] }
+        else
+          ActiveModel::ArraySerializer.new(errors, root: 'errors').to_json
+        end
+
+      render json: errors_json, status: status
     end
   end
 end
