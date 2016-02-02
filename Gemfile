@@ -5,6 +5,9 @@ gem 'rails-api'
 gem 'pg', '~> 0.15'
 gem 'faker', '~> 1.6.1'
 gem 'active_model_serializers', '~> 0.9.4'
+gem 'devise', '~> 3.5.6'
+gem 'omniauth', '~> 1.3.1'
+gem 'devise_token_auth', '~> 0.1.37'
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.4.0'
