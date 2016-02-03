@@ -11,7 +11,7 @@ RSpec.describe Api::V1::VictoriesController do
     end
 
     it 'returns the total count of victories in the header' do
-      expect(subject.header['Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
+      expect(subject.header['X-Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
     end
 
     context 'without page param' do
