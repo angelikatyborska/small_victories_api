@@ -37,8 +37,12 @@ RSpec.describe Api::V1::VictoriesController do
       expect(subject.body).to eq({
         victory: {
           id: victory.id,
-          user_id: victory.user.id,
-          body: victory.body
+          body: victory.body,
+          created_at: victory.created_at.utc.iso8601,
+          user: {
+            id: victory.user.id,
+            nickname: victory.user.nickname
+          }
         }
       }.to_json)
     end
@@ -62,21 +66,21 @@ RSpec.describe Api::V1::VictoriesController do
         it 'creates a new victory' do
           expect { subject }.to change(Victory, :count).by(1)
         end
+      end
 
-        context 'with invalid params' do
-          subject { xhr :post, :create, victory: { user_id: user.id } }
+      context 'with invalid params' do
+        subject { xhr :post, :create, victory: { user_id: user.id } }
 
-          it 'returns a 422 response status' do
-            expect(subject.status).to eq 422
-          end
+        it 'returns a 422 response status' do
+          expect(subject.status).to eq 422
+        end
 
-          it 'returns errors' do
-            expect(subject.body).to eq({
-              errors: [
-                { body: [ 'can\'t be blank' ] }
-              ]
-            }.to_json)
-          end
+        it 'returns errors' do
+          expect(subject.body).to eq({
+            errors: [
+              { body: [ 'can\'t be blank' ] }
+            ]
+          }.to_json)
         end
       end
 
