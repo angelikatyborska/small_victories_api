@@ -4,8 +4,7 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
 
     render json: ActiveModel::ArraySerializer.new(
       @victories,
-      each_serializer: Api::V1::VictorySerializer,
-      root: 'victories'
+      each_serializer: Api::V1::VictorySerializer
     )
   end
 
@@ -21,7 +20,7 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
     if authorize_user!(@victory.user)
       if @victory.save
         # TODO: this or redirect to show?
-        render json: Api::V1::VictorySerializer.new(@victory).to_json
+        render json:  Api::V1::VictorySerializer.new(@victory).to_json
       else
         render json: Api::V1::ErrorsSerializer.new(@victory.errors).to_json, status: 422
       end

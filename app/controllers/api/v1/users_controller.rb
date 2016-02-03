@@ -4,8 +4,7 @@ class Api::V1::UsersController < Api::V1::ApplicationController
 
     render json: ActiveModel::ArraySerializer.new(
       @users,
-      each_serializer: Api::V1::UserSerializer,
-      root: 'users'
+      each_serializer: Api::V1::UserSerializer
     )
   end
 

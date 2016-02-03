@@ -11,7 +11,7 @@ RSpec.describe Api::V1::VictoriesController do
     end
 
     it 'returns all victories' do
-      expect(JSON.parse(subject.body)['victories'].length).to eq victories.length
+      expect(JSON.parse(subject.body).length).to eq victories.length
     end
   end
 
@@ -35,14 +35,12 @@ RSpec.describe Api::V1::VictoriesController do
 
     it 'returns the victory' do
       expect(subject.body).to eq({
-        victory: {
-          id: victory.id,
-          body: victory.body,
-          created_at: victory.created_at.utc.iso8601,
-          user: {
-            id: victory.user.id,
-            nickname: victory.user.nickname
-          }
+        id: victory.id,
+        body: victory.body,
+        created_at: victory.created_at.utc.iso8601,
+        user: {
+          id: victory.user.id,
+          nickname: victory.user.nickname
         }
       }.to_json)
     end

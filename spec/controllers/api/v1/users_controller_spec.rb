@@ -9,7 +9,7 @@ RSpec.describe Api::V1::UsersController do
     end
 
     it 'returns all users' do
-      expect(JSON.parse(subject.body)['users'].length).to eq users.length
+      expect(JSON.parse(subject.body).length).to eq users.length
     end
   end
 
@@ -33,11 +33,9 @@ RSpec.describe Api::V1::UsersController do
 
       it 'returns the user' do
         expect(subject.body).to eq({
-          user: {
-            id: user.id,
-            email: user.email,
-            nickname: user.nickname
-          }
+          id: user.id,
+          email: user.email,
+          nickname: user.nickname
         }.to_json)
       end
     end

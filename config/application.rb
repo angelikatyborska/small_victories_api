@@ -29,5 +29,7 @@ module SmallVictories
         resource '*', headers: :any, methods: [:get, :post, :put, :patch, :delete, :options, :head]
       end
     end
+
+    config.active_record.include_root_in_json = false
   end
 end
