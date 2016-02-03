@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::VictoriesController do
   describe 'GET #index' do
-    let!(:victories) { create_list :victory, 5 }
+    let!(:victories) { create_list :victory, Kaminari.config.default_per_page * 3 }
 
     subject { xhr :get, :index }
 
@@ -10,8 +10,49 @@ RSpec.describe Api::V1::VictoriesController do
       expect(subject.status).to eq 200
     end
 
-    it 'returns all victories' do
-      expect(JSON.parse(subject.body).length).to eq victories.length
+    it 'returns the total count of victories in the header' do
+      expect(subject.header['Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
+    end
+
+    context 'without page param' do
+      it 'returns the first page of latest victories' do
+        parsed_response = JSON.parse(subject.body)
+
+        expect(parsed_response.length).to eq Kaminari.config.default_per_page
+        expect(parsed_response.map { |victory| victory['id'] }).to eq(
+          Victory
+            .order(created_at: :desc)
+            .limit(Kaminari.config.default_per_page)
+            .map(&:id)
+        )
+      end
+
+      it 'includes pagination links in the header' do
+        expect(subject.header['Link']).to match /rel=\"next\"/
+        expect(subject.header['Link']).to match /rel=\"last\"/
+      end
+    end
+
+    context 'with page param' do
+      subject { xhr :get, :index, page: 2 }
+
+      it 'returns the second page of latest victories' do
+        parsed_response = JSON.parse(subject.body)
+
+        expect(parsed_response.length).to eq Kaminari.config.default_per_page
+        expect(parsed_response.map { |victory| victory['id'] }).to eq(
+          Victory
+            .order(created_at: :desc)
+            .limit(Kaminari.config.default_per_page)
+            .offset(Kaminari.config.default_per_page)
+            .map(&:id)
+        )
+      end
+
+      it 'includes pagination links in the header' do
+        expect(subject.header['Link']).to match /rel=\"prev\"/
+        expect(subject.header['Link']).to match /rel=\"first\"/
+      end
     end
   end
 
