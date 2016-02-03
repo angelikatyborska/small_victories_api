@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'rails', '4.2.5.1'
 gem 'rails-api'
+gem 'rack-cors', require: 'rack/cors'
 gem 'pg', '~> 0.15'
 gem 'faker', '~> 1.6.1'
 gem 'active_model_serializers', '~> 0.9.4'
