@@ -2,26 +2,26 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::VictoriesController do
   describe 'GET #index' do
-    let!(:victories) { create_list :victory, Kaminari.config.default_per_page * 3 }
+    context 'without params' do
+      let!(:victories) { create_list :victory, Kaminari.config.default_per_page * 3 }
 
-    subject { xhr :get, :index }
+      subject { xhr :get, :index }
 
-    it 'returns a 200 response status' do
-      expect(subject.status).to eq 200
-    end
+      it 'returns a 200 response status' do
+        expect(subject.status).to eq 200
+      end
 
-    it 'returns the total count of victories in the header' do
-      expect(subject.header['X-Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
-    end
+      it 'returns the total count of victories in the header' do
+        expect(subject.header['X-Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
+      end
 
-    context 'without page param' do
       it 'returns the first page of latest victories' do
         parsed_response = JSON.parse(subject.body)
 
         expect(parsed_response.length).to eq Kaminari.config.default_per_page
         expect(parsed_response.map { |victory| victory['id'] }).to eq(
           Victory
-            .order(created_at: :desc)
+            .order(described_class::DEFAULT_SORT_PARAMS)
             .limit(Kaminari.config.default_per_page)
             .map(&:id)
         )
@@ -33,18 +33,20 @@ RSpec.describe Api::V1::VictoriesController do
       end
     end
 
-    context 'with page param' do
-      subject { xhr :get, :index, page: 2 }
+    describe 'pagination' do
+      let!(:victories) { create_list :victory, 15 }
+
+      subject { xhr :get, :index, page: 2, per_page: 5 }
 
       it 'returns the second page of latest victories' do
         parsed_response = JSON.parse(subject.body)
 
-        expect(parsed_response.length).to eq Kaminari.config.default_per_page
+        expect(parsed_response.length).to eq 5
         expect(parsed_response.map { |victory| victory['id'] }).to eq(
           Victory
-            .order(created_at: :desc)
-            .limit(Kaminari.config.default_per_page)
-            .offset(Kaminari.config.default_per_page)
+            .order(described_class::DEFAULT_SORT_PARAMS)
+            .limit(5)
+            .offset(5)
             .map(&:id)
         )
       end
@@ -52,6 +54,66 @@ RSpec.describe Api::V1::VictoriesController do
       it 'includes pagination links in the header' do
         expect(subject.header['Link']).to match /rel=\"prev\"/
         expect(subject.header['Link']).to match /rel=\"first\"/
+      end
+    end
+
+    describe 'sorting' do
+      let!(:victories) do
+        ('A'..'Z').each_with_object([]) do |char, victories|
+          3.times do
+            victories << create(:victory, body: char * 10)
+          end
+        end
+      end
+
+      context 'valid sort param' do
+        subject { xhr :get, :index, sort: '-body,+created_at' }
+
+        it 'returns the first page of sorted victories' do
+          parsed_response = JSON.parse(subject.body)
+
+          expect(parsed_response.length).to eq Kaminari.config.default_per_page
+          expect(parsed_response.map { |victory| victory['id'] }).to eq(
+            Victory
+              .order(body: :desc, created_at: :asc)
+              .limit(Kaminari.config.default_per_page)
+              .map(&:id)
+          )
+        end
+      end
+
+      context 'invalid sort param' do
+        context 'without order' do
+          subject { xhr :get, :index, sort: 'body' }
+
+          it 'returns the first page of victories sorted with default order' do
+            parsed_response = JSON.parse(subject.body)
+
+            expect(parsed_response.length).to eq Kaminari.config.default_per_page
+            expect(parsed_response.map { |victory| victory['id'] }).to eq(
+              Victory
+                .order(described_class::DEFAULT_SORT_PARAMS)
+                .limit(Kaminari.config.default_per_page)
+                .map(&:id)
+            )
+          end
+        end
+
+        context 'invalid attribute' do
+          subject { xhr :get, :index, sort: '+invalid_attribute' }
+
+          it 'returns the first page of victories sorted with default order' do
+            parsed_response = JSON.parse(subject.body)
+
+            expect(parsed_response.length).to eq Kaminari.config.default_per_page
+            expect(parsed_response.map { |victory| victory['id'] }).to eq(
+              Victory
+                .order(described_class::DEFAULT_SORT_PARAMS)
+                .limit(Kaminari.config.default_per_page)
+                .map(&:id)
+            )
+          end
+        end
       end
     end
   end

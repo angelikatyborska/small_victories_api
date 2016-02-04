@@ -2,7 +2,9 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
   after_action only: [:index] { set_pagination_headers(:victories) }
 
   def index
-    @victories = Victory.order(created_at: :desc).page(params[:page] || 1)
+    order = sort_params(Victory)
+
+    @victories = Victory.order(order).page(params[:page] || 1)
 
     render json: ActiveModel::ArraySerializer.new(
       @victories,
