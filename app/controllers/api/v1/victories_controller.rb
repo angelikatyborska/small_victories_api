@@ -4,7 +4,10 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
   def index
     order = sort_params(Victory)
 
-    @victories = Victory.order(order).page(params[:page] || 1)
+    @victories = Victory
+      .order(order)
+      .page(params[:page] || 1)
+      .per(params[:per_page] || Kaminari.config.default_per_page)
 
     render json: ActiveModel::ArraySerializer.new(
       @victories,

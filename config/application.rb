@@ -29,7 +29,7 @@ module SmallVictories
         resource '*',
           headers: :any,
           methods: [:get, :post, :put, :patch, :delete, :options, :head],
-          expose: ['Link', 'X-Total-Count']
+          expose: ['Link', 'X-Total-Count', 'access-token', 'expiry', 'token-type', 'uid', 'client']
       end
     end
 
