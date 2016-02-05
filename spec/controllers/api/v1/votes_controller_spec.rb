@@ -71,4 +71,45 @@ RSpec.describe Api::V1::VotesController do
       end
     end
   end
+
+  describe 'DELETE #destroy' do
+    let!(:user) { create :user }
+    let!(:another_user) { create :user }
+    let!(:vote) { create :vote, user: user }
+    let!(:another_vote) { create :vote, user: another_user }
+
+    before :each do
+      authorize_request(user)
+    end
+
+    context 'vote doesn\'t exist' do
+      subject { xhr :delete, :destroy, victory_id: vote.victory.id, id: 0 }
+
+      it 'returns a 404 response status' do
+        expect(subject.status).to eq 404
+      end
+    end
+
+    context 'vote exists' do
+      context 'for the same user' do
+        subject { xhr :delete, :destroy, victory_id: vote.victory.id, id: vote }
+
+        it 'returns a 204 response status' do
+          expect(subject.status).to eq 204
+        end
+
+        it 'deletes the vote' do
+          expect { subject }.to change(Vote, :count).by(-1)
+        end
+      end
+
+      context 'for another user' do
+        subject { xhr :delete, :destroy, victory_id: another_vote.victory.id, id: another_vote }
+
+        it 'returns a 403 response status' do
+          expect(subject.status).to eq 403
+        end
+      end
+    end
+  end
 end

@@ -20,6 +20,16 @@ class Api::V1::VotesController < Api::V1::ApplicationController
     end
   end
 
+  def destroy
+    @vote = Victory.find(params[:victory_id]).votes.find(params[:id])
+
+    if authorize_user!(@vote.user)
+      @vote.destroy
+
+      head :no_content
+    end
+  end
+
   private
 
   def vote_params
