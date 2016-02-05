@@ -16,15 +16,16 @@ RSpec.describe Api::V1::VictoriesController do
       end
 
       it 'returns the first page of latest victories' do
-        parsed_response = JSON.parse(subject.body)
-
-        expect(parsed_response.length).to eq Kaminari.config.default_per_page
-        expect(parsed_response.map { |victory| victory['id'] }).to eq(
+        expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to eq(
           Victory
             .order(described_class::DEFAULT_SORT_PARAMS)
             .limit(Kaminari.config.default_per_page)
             .map(&:id)
         )
+      end
+
+      it 'includes only the right keys' do
+        expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'created_at', 'user', 'body']
       end
 
       it 'includes pagination links in the header' do
@@ -137,15 +138,15 @@ RSpec.describe Api::V1::VictoriesController do
     end
 
     it 'returns the victory' do
-      expect(subject.body).to eq({
-        id: victory.id,
-        body: victory.body,
-        created_at: victory.created_at.utc.iso8601,
-        user: {
-          id: victory.user.id,
-          nickname: victory.user.nickname
-        }
-      }.to_json)
+      parsed_response = JSON.parse(subject.body)
+
+      expect(parsed_response['id']).to eq victory.id
+      expect(parsed_response['created_at']).to eq victory.created_at.utc.iso8601
+      expect(parsed_response['body']).to eq victory.body
+      expect(parsed_response['user']).to eq({
+        'id' => victory.user.id,
+        'nickname' => victory.user.nickname
+      })
     end
   end
 

@@ -9,8 +9,12 @@ class Api::V1::UsersController < Api::V1::ApplicationController
   end
 
   def show
-    @user = User.find(params[:id])
+    @user = User.find_by(nickname: params[:nickname])
 
-    render json: Api::V1::UserSerializer.new(@user).to_json
+    if @user.nil?
+      not_found
+    else
+      render json: Api::V1::UserDetailsSerializer.new(@user).to_json
+    end
   end
 end

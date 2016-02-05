@@ -11,11 +11,15 @@ RSpec.describe Api::V1::UsersController do
     it 'returns all users' do
       expect(JSON.parse(subject.body).length).to eq users.length
     end
+
+    it 'includes only the right keys' do
+      expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'nickname']
+    end
   end
 
   describe '#show' do
     context 'user doesn\'t exist' do
-      subject { xhr :get, :show, id: 0 }
+      subject { xhr :get, :show, nickname: 'does_not_exist' }
 
       it 'returns a 404 response status' do
         expect(subject.status).to eq 404
@@ -24,19 +28,27 @@ RSpec.describe Api::V1::UsersController do
 
     context 'user exists' do
       let!(:user) { create :user }
+      let!(:victory) { create :victory, user: user }
 
-      subject { xhr :get, :show, id: user.id }
+      subject { xhr :get, :show, nickname: user.nickname }
 
       it 'returns a 200 response status' do
         expect(subject.status).to eq 200
       end
 
-      it 'returns the user' do
-        expect(subject.body).to eq({
-          id: user.id,
-          email: user.email,
-          nickname: user.nickname
-        }.to_json)
+      it 'includes only the right keys' do
+        expect(JSON.parse(subject.body).keys).to match_array ['id', 'nickname', 'email', 'victories']
+      end
+
+      it 'returns the user with correct data' do
+        parsed_response = JSON.parse(subject.body)
+
+        expect(parsed_response['id']).to eq user.id
+        expect(parsed_response['nickname']).to eq user.nickname
+        expect(parsed_response['email']).to eq user.email
+        expect(parsed_response['victories']).to eq(
+          [{ 'id' => victory.id, 'body' => victory.body, 'created_at' => victory.created_at.utc.iso8601 }]
+        )
       end
     end
   end
