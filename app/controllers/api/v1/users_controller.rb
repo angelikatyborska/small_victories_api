@@ -9,7 +9,7 @@ class Api::V1::UsersController < Api::V1::ApplicationController
   end
 
   def show
-    @user = User.find_by(nickname: params[:nickname])
+    @user = User.includes(:victories).find_by(nickname: params[:nickname])
 
     if @user.nil?
       not_found

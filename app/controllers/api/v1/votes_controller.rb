@@ -4,7 +4,7 @@ class Api::V1::VotesController < Api::V1::ApplicationController
 
     not_found if @victory.nil?
 
-    @votes = @victory.votes
+    @votes = @victory.votes.includes(:user)
 
     render json: ActiveModel::ArraySerializer.new(
       @votes,
