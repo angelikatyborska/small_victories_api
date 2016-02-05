@@ -25,7 +25,7 @@ RSpec.describe Api::V1::VictoriesController do
       end
 
       it 'includes only the right keys' do
-        expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'created_at', 'user', 'body']
+        expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'created_at', 'user', 'body', 'votes_count']
       end
 
       it 'includes pagination links in the header' do
@@ -142,6 +142,7 @@ RSpec.describe Api::V1::VictoriesController do
 
       expect(parsed_response['id']).to eq victory.id
       expect(parsed_response['created_at']).to eq victory.created_at.utc.iso8601
+      expect(parsed_response['votes_count']).to eq 0
       expect(parsed_response['body']).to eq victory.body
       expect(parsed_response['user']).to eq({
         'id' => victory.user.id,
