@@ -49,12 +49,4 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
   def victory_params
     params.require(:victory).permit(:user_id, :body)
   end
-
-  def authorize_user!(user)
-    return true if user_signed_in? && current_user == user
-
-    head 403
-
-    false
-  end
 end

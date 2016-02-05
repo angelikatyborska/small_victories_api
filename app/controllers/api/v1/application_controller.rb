@@ -29,4 +29,12 @@ class Api::V1::ApplicationController < ActionController::API
 
     sort_params.empty? ? DEFAULT_SORT_PARAMS : sort_params
   end
+
+  def authorize_user!(user)
+    return true if user_signed_in? && current_user == user
+
+    head 403
+
+    false
+  end
 end
