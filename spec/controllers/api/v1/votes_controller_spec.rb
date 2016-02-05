@@ -92,6 +92,74 @@ RSpec.describe Api::V1::VotesController do
     end
   end
 
+  describe 'PUT #update' do
+    let!(:user) { create :user }
+    let!(:vote) { create :vote, value: 1, user: user }
+
+    before :each do
+      authorize_request(user)
+    end
+
+    context 'victory doesn\'t exist' do
+      subject { xhr :put, :update, victory_id: 0, id: 0, vote: {} }
+
+      it 'returns a 404 response status' do
+        expect(subject.status).to eq 404
+      end
+    end
+
+    context 'victory exists' do
+      context 'vote doesn\'t exist' do
+        subject { xhr :put, :update, victory_id: vote.victory.id, id: 0, vote: {} }
+
+        it 'returns a 404 response status' do
+          expect(subject.status).to eq 404
+        end
+      end
+
+      context 'vote exists' do
+        context 'for the same user' do
+          context 'with valid params' do
+            subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: { value: -1 } }
+
+            it 'returns a 200 response status' do
+              expect(subject.status).to eq 200
+            end
+
+            it 'changes vote\'s value' do
+              subject
+              expect(vote.reload.value).to eq -1
+            end
+          end
+
+          context 'with invalid params' do
+            subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: { value: 0 } }
+
+            it 'returns a 422 response status' do
+              expect(subject.status).to eq 422
+            end
+
+            it 'does not change vote\'s value' do
+              subject
+              expect(vote.reload.value).to eq 1
+            end
+          end
+        end
+
+        context 'for another user' do
+          let!(:another_vote) { create :vote }
+
+          subject { xhr :put, :update, victory_id: another_vote.victory.id, id: another_vote.id, vote: { value: -1 } }
+
+          it 'returns a 403 response status' do
+            expect(subject.status).to eq 403
+          end
+        end
+      end
+    end
+  end
+
+
   describe 'DELETE #destroy' do
     let!(:user) { create :user }
     let!(:another_user) { create :user }
@@ -111,7 +179,6 @@ RSpec.describe Api::V1::VotesController do
     end
 
     context 'victory exists' do
-
       context 'vote doesn\'t exist' do
         subject { xhr :delete, :destroy, victory_id: vote.victory.id, id: 0 }
 

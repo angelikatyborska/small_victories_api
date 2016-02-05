@@ -28,6 +28,22 @@ class Api::V1::VotesController < Api::V1::ApplicationController
     end
   end
 
+  def update
+    @victory =  Victory.find(params[:victory_id])
+
+    not_found if @victory.nil?
+
+    @vote = @victory.votes.find(params[:id])
+
+    if authorize_user!(@vote.user)
+      if @vote.update_attributes(vote_params)
+        render json: Api::V1::VoteSerializer.new(@vote).to_json
+      else
+        render json: Api::V1::ErrorsSerializer.new(@vote.errors).to_json, status: 422
+      end
+    end
+  end
+
   def destroy
     @victory =  Victory.find(params[:victory_id])
 
