@@ -1,6 +1,10 @@
 class Api::V1::VotesController < Api::V1::ApplicationController
   def index
-    @votes = Vote.where(victory_id: params[:victory_id])
+    @victory =  Victory.find(params[:victory_id])
+
+    not_found if @victory.nil?
+
+    @votes = @victory.votes
 
     render json: ActiveModel::ArraySerializer.new(
       @votes,
@@ -9,7 +13,11 @@ class Api::V1::VotesController < Api::V1::ApplicationController
   end
 
   def create
-    @vote = Victory.find(params[:victory_id]).votes.new(vote_params)
+    @victory =  Victory.find(params[:victory_id])
+
+    not_found if @victory.nil?
+
+    @vote = @victory.votes.new(vote_params)
 
     if authorize_user!(@vote.user)
       if @vote.save
@@ -21,7 +29,11 @@ class Api::V1::VotesController < Api::V1::ApplicationController
   end
 
   def destroy
-    @vote = Victory.find(params[:victory_id]).votes.find(params[:id])
+    @victory =  Victory.find(params[:victory_id])
+
+    not_found if @victory.nil?
+
+    @vote = @victory.votes.find(params[:id])
 
     if authorize_user!(@vote.user)
       @vote.destroy
