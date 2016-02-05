@@ -31,4 +31,14 @@ end
 
 victories = Victory.create!(victories_data)
 
+puts 'Creating votes...'
+
+votes_data = victories.each_with_object([]) do |victory, votes_data|
+  users.sample(5).each do |user|
+    votes_data << { user: user, victory: victory, value: [1, -1].sample }
+  end
+end
+
+Vote.create!(votes_data)
+
 puts 'Seeds: done'

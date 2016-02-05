@@ -9,7 +9,8 @@ RSpec.describe User do
   end
 
   describe 'associations' do
-    it { is_expected.to have_many :victories }
+    it { is_expected.to have_many(:victories).dependent(:destroy) }
+    it { is_expected.to have_many(:votes).dependent(:destroy) }
   end
 
   describe 'database columns' do

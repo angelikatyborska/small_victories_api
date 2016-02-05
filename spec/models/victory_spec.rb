@@ -8,6 +8,7 @@ RSpec.describe Victory do
 
   describe 'associations' do
     it { is_expected.to belong_to :user }
+    it { is_expected.to have_many(:votes).dependent(:destroy) }
   end
 
   describe 'database columns' do

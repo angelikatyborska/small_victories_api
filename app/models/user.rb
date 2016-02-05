@@ -5,7 +5,8 @@ class User < ActiveRecord::Base
 
   include DeviseTokenAuth::Concerns::User
 
-  has_many :victories
+  has_many :victories, dependent: :destroy
+  has_many :votes, dependent: :destroy
 
   validates :nickname, presence: true, uniqueness: true
 end
