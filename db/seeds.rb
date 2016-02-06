@@ -1,13 +1,14 @@
+require 'database_cleaner'
+
 puts 'Seeds: start'
 
 puts 'Cleaning the database...'
 
-Victory.destroy_all
-User.destroy_all
+DatabaseCleaner.clean_with(:truncation)
 
 puts 'Creating users...'
 
-users_data = 50.times.with_object([]) do |n, users_data|
+users_data = 30.times.with_object([]) do |n, users_data|
   users_data << {
     email: "user#{ n }@example.com",
     nickname: "#{Faker::Internet.user_name}_#{ n }",
@@ -34,7 +35,7 @@ victories = Victory.create!(victories_data)
 puts 'Creating votes...'
 
 votes_data = victories.each_with_object([]) do |victory, votes_data|
-  users.sample(10).each do |user|
+  users.sample(15).each do |user|
     votes_data << { user: user, victory: victory, value: [1, -1].sample }
   end
 end

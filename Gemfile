@@ -4,6 +4,7 @@ gem 'rails', '4.2.5.1'
 gem 'rails-api'
 gem 'rack-cors', '~> 0.4.0', require: 'rack/cors'
 gem 'pg', '~> 0.15'
+gem 'database_cleaner', '~> 1.5.0'
 gem 'faker', '~> 1.6.1'
 gem 'active_model_serializers', '~> 0.9.4'
 gem 'devise', '~> 3.5.6'
@@ -23,7 +24,6 @@ group :development do
 end
 
 group :test do
-  gem 'database_cleaner', '~> 1.5.0'
   gem 'launchy', '~> 2.4.3'
   gem 'shoulda-matchers', '~> 3.0.1'
   gem 'simplecov', '~> 0.11.1', require: false
