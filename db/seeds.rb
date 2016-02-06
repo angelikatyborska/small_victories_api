@@ -10,7 +10,7 @@ puts 'Creating users...'
 users_data = 50.times.with_object([]) do |n, users_data|
   users_data << {
     email: "user#{ n }@example.com",
-    nickname: "#{Faker::Internet.user_name}_n",
+    nickname: "#{Faker::Internet.user_name}_#{ n }",
     password: 'password',
     confirmed_at: Time.zone.now
   }
