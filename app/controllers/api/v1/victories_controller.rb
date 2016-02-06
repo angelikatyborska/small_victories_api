@@ -3,10 +3,16 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
 
   def index
     order = sort_params(Victory)
+    where = {}
+
+    if params[:user_id]
+      where = { user_id: params[:user_id] }
+    end
 
     @victories = Victory
       .includes(:user)
       .order(order)
+      .where(where)
       .page(params[:page] || 1)
       .per(params[:per_page] || Kaminari.config.default_per_page)
 
@@ -27,7 +33,6 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
 
     if authorize_user!(@victory.user)
       if @victory.save
-        # TODO: this or redirect to show?
         render json:  Api::V1::VictorySerializer.new(@victory).to_json
       else
         render json: Api::V1::ErrorsSerializer.new(@victory.errors).to_json, status: 422
