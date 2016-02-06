@@ -10,26 +10,15 @@ RSpec.describe Api::V1::VotesController do
     context 'victory doesn\'t exist' do
       subject { xhr :get, :index, victory_id: 0 }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'victory exists' do
       subject { xhr :get, :index, victory_id: victory.id }
 
-      it 'returns a 200 response status' do
-        expect(subject.status).to eq 200
-      end
-
-      it 'returns the votes for the victory' do
-        expect(JSON.parse(subject.body).map { |vote| vote['id'] }).to match_array votes.map(&:id)
-      end
-
-      it 'includes only the right keys' do
-        expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'value', 'user']
-        expect(JSON.parse(subject.body)[0]['user'].keys).to match_array ['id', 'nickname']
-      end
+      it { is_expected.to respond_with_status 200 }
+      it { is_expected.to respond_with_records votes.map(&:id) }
+      it { is_expected.to respond_with_keys [:id, :value, { user: [:id, :nickname] }] }
     end
   end
 
@@ -44,9 +33,7 @@ RSpec.describe Api::V1::VotesController do
     context 'victory doesn\'t exist' do
       subject { xhr :post, :create, victory_id: 0, vote: { user_id: user.id, value: 1 } }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'victory exists' do
@@ -54,9 +41,7 @@ RSpec.describe Api::V1::VotesController do
         context 'with valid params' do
           subject { xhr :post, :create, victory_id: victory.id, vote: { user_id: user.id, value: 1 } }
 
-          it 'returns a 200 response status' do
-            expect(subject.status).to eq 200
-          end
+          it { is_expected.to respond_with_status 200 }
 
           it 'creates a new vote' do
             expect { subject }.to change(Vote, :count).by(1)
@@ -67,17 +52,8 @@ RSpec.describe Api::V1::VotesController do
       context 'with invalid params' do
         subject { xhr :post, :create, victory_id: victory.id, vote: { user_id: user.id, value: 0 } }
 
-        it 'returns a 422 response status' do
-          expect(subject.status).to eq 422
-        end
-
-        it 'returns errors' do
-          expect(subject.body).to eq({
-            errors: [
-              { value: [ 'is not included in the list' ] }
-            ]
-          }.to_json)
-        end
+        it { is_expected.to respond_with_status 422 }
+        it { is_expected.to respond_with_errors [{ value: ['is not included in the list'] }] }
       end
 
       context 'for another user' do
@@ -85,9 +61,7 @@ RSpec.describe Api::V1::VotesController do
 
         subject { xhr :post, :create, victory_id: victory.id, vote: { user_id: another_user.id, value: 1 } }
 
-        it 'returns a 403 response status' do
-          expect(subject.status).to eq 403
-        end
+        it { is_expected.to respond_with_status 403 }
       end
     end
   end
@@ -103,18 +77,14 @@ RSpec.describe Api::V1::VotesController do
     context 'victory doesn\'t exist' do
       subject { xhr :put, :update, victory_id: 0, id: 0, vote: {} }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'victory exists' do
       context 'vote doesn\'t exist' do
         subject { xhr :put, :update, victory_id: vote.victory.id, id: 0, vote: {} }
 
-        it 'returns a 404 response status' do
-          expect(subject.status).to eq 404
-        end
+        it { is_expected.to respond_with_status 404 }
       end
 
       context 'vote exists' do
@@ -122,9 +92,7 @@ RSpec.describe Api::V1::VotesController do
           context 'with valid params' do
             subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: { value: -1 } }
 
-            it 'returns a 200 response status' do
-              expect(subject.status).to eq 200
-            end
+            it { is_expected.to respond_with_status 200 }
 
             it 'changes vote\'s value' do
               subject
@@ -135,9 +103,7 @@ RSpec.describe Api::V1::VotesController do
           context 'with invalid params' do
             subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: { value: 0 } }
 
-            it 'returns a 422 response status' do
-              expect(subject.status).to eq 422
-            end
+            it { is_expected.to respond_with_status 422 }
 
             it 'does not change vote\'s value' do
               subject
@@ -151,9 +117,7 @@ RSpec.describe Api::V1::VotesController do
 
           subject { xhr :put, :update, victory_id: another_vote.victory.id, id: another_vote.id, vote: { value: -1 } }
 
-          it 'returns a 403 response status' do
-            expect(subject.status).to eq 403
-          end
+          it { is_expected.to respond_with_status 403 }
         end
       end
     end
@@ -173,27 +137,21 @@ RSpec.describe Api::V1::VotesController do
     context 'victory doesn\'t exist' do
       subject { xhr :delete, :destroy, victory_id: 0, id: 0 }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'victory exists' do
       context 'vote doesn\'t exist' do
         subject { xhr :delete, :destroy, victory_id: vote.victory.id, id: 0 }
 
-        it 'returns a 404 response status' do
-          expect(subject.status).to eq 404
-        end
+        it { is_expected.to respond_with_status 404 }
       end
 
       context 'vote exists' do
         context 'for the same user' do
           subject { xhr :delete, :destroy, victory_id: vote.victory.id, id: vote }
 
-          it 'returns a 204 response status' do
-            expect(subject.status).to eq 204
-          end
+          it { is_expected.to respond_with_status 204 }
 
           it 'deletes the vote' do
             expect { subject }.to change(Vote, :count).by(-1)
@@ -203,9 +161,7 @@ RSpec.describe Api::V1::VotesController do
         context 'for another user' do
           subject { xhr :delete, :destroy, victory_id: another_vote.victory.id, id: another_vote }
 
-          it 'returns a 403 response status' do
-            expect(subject.status).to eq 403
-          end
+          it { is_expected.to respond_with_status 403 }
         end
       end
     end

@@ -7,16 +7,14 @@ RSpec.describe Api::V1::VictoriesController do
 
       subject { xhr :get, :index }
 
-      it 'returns a 200 response status' do
-        expect(subject.status).to eq 200
-      end
+      it { is_expected.to respond_with_status 200 }
 
       it 'returns the total count of victories in the header' do
         expect(subject.header['X-Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
       end
 
       it 'returns the first page of latest victories' do
-        expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to eq(
+        is_expected.to respond_with_records(
           Victory
             .order(described_class::DEFAULT_SORT_PARAMS)
             .limit(Kaminari.config.default_per_page)
@@ -24,9 +22,7 @@ RSpec.describe Api::V1::VictoriesController do
         )
       end
 
-      it 'includes only the right keys' do
-        expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'created_at', 'user', 'body', 'rating']
-      end
+      it { is_expected.to respond_with_keys [:id, :created_at, :user, :body, :rating] }
 
       it 'includes pagination links in the header' do
         expect(subject.header['Link']).to match /rel=\"next\"/
@@ -43,7 +39,7 @@ RSpec.describe Api::V1::VictoriesController do
         parsed_response = JSON.parse(subject.body)
 
         expect(parsed_response.length).to eq 5
-        expect(parsed_response.map { |victory| victory['id'] }).to eq(
+        is_expected.to respond_with_records(
           Victory
             .order(described_class::DEFAULT_SORT_PARAMS)
             .limit(5)
@@ -74,7 +70,7 @@ RSpec.describe Api::V1::VictoriesController do
           parsed_response = JSON.parse(subject.body)
 
           expect(parsed_response.length).to eq Kaminari.config.default_per_page
-          expect(parsed_response.map { |victory| victory['id'] }).to eq(
+          is_expected.to respond_with_records(
             Victory
               .order(body: :desc, created_at: :asc)
               .limit(Kaminari.config.default_per_page)
@@ -91,7 +87,7 @@ RSpec.describe Api::V1::VictoriesController do
             parsed_response = JSON.parse(subject.body)
 
             expect(parsed_response.length).to eq Kaminari.config.default_per_page
-            expect(parsed_response.map { |victory| victory['id'] }).to eq(
+            is_expected.to respond_with_records(
               Victory
                 .order(described_class::DEFAULT_SORT_PARAMS)
                 .limit(Kaminari.config.default_per_page)
@@ -107,7 +103,7 @@ RSpec.describe Api::V1::VictoriesController do
             parsed_response = JSON.parse(subject.body)
 
             expect(parsed_response.length).to eq Kaminari.config.default_per_page
-            expect(parsed_response.map { |victory| victory['id'] }).to eq(
+            is_expected.to respond_with_records(
               Victory
                 .order(described_class::DEFAULT_SORT_PARAMS)
                 .limit(Kaminari.config.default_per_page)
@@ -125,7 +121,7 @@ RSpec.describe Api::V1::VictoriesController do
         subject { xhr :get, :index, per_page: 10, user: victories[0].user.nickname }
 
         it 'only finds victories submitted by the user' do
-          expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to match_array [victories[0].id]
+          is_expected.to respond_with_records [victories[0].id]
         end
       end
 
@@ -133,7 +129,7 @@ RSpec.describe Api::V1::VictoriesController do
         subject { xhr :get, :index, per_page: 10, user: 'invalid_nickname' }
 
         it 'finds nothing' do
-          expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to match_array []
+          is_expected.to respond_with_records []
         end
       end
     end
@@ -143,9 +139,7 @@ RSpec.describe Api::V1::VictoriesController do
     context 'victory doesn\'t exist' do
       subject { xhr :get, :show, id: 0 }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'factory exists'
@@ -153,9 +147,7 @@ RSpec.describe Api::V1::VictoriesController do
 
     subject { xhr :get, :show, id: victory.id }
 
-    it 'returns a 200 response status' do
-      expect(subject.status).to eq 200
-    end
+    it { is_expected.to respond_with_status 200 }
 
     it 'returns the victory' do
       parsed_response = JSON.parse(subject.body)
@@ -182,9 +174,7 @@ RSpec.describe Api::V1::VictoriesController do
       context 'with valid params' do
         subject { xhr :post, :create, victory: { user_id: user.id, body: 'Lorem ipsum.' } }
 
-        it 'returns a 200 response status' do
-          expect(subject.status).to eq 200
-        end
+        it { is_expected.to respond_with_status 200 }
 
         it 'creates a new victory' do
           expect { subject }.to change(Victory, :count).by(1)
@@ -194,17 +184,8 @@ RSpec.describe Api::V1::VictoriesController do
       context 'with invalid params' do
         subject { xhr :post, :create, victory: { user_id: user.id } }
 
-        it 'returns a 422 response status' do
-          expect(subject.status).to eq 422
-        end
-
-        it 'returns errors' do
-          expect(subject.body).to eq({
-            errors: [
-              { body: [ 'can\'t be blank' ] }
-            ]
-          }.to_json)
-        end
+        it { is_expected.to respond_with_status 422 }
+        it { is_expected.to respond_with_errors [{ body: ['can\'t be blank'] }] }
       end
 
       context 'for another user' do
@@ -212,12 +193,11 @@ RSpec.describe Api::V1::VictoriesController do
 
         subject { xhr :post, :create, victory: { user_id: another_user.id, body: 'Lorem ipsum.' } }
 
-        it 'returns a 403 response status' do
-          expect(subject.status).to eq 403
-        end
+        it { is_expected.to respond_with_status 403 }
       end
     end
   end
+
 
   describe 'DELETE #destroy' do
     let!(:user) { create :user }
@@ -229,9 +209,7 @@ RSpec.describe Api::V1::VictoriesController do
     context 'victory doesn\'t exist' do
       subject { xhr :delete, :destroy, id: 0 }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'victory exists' do
@@ -240,9 +218,7 @@ RSpec.describe Api::V1::VictoriesController do
 
         subject { xhr :delete, :destroy, id: victory.id }
 
-        it 'returns a 204 response status' do
-          expect(subject.status).to eq 204
-        end
+        it { is_expected.to respond_with_status 204 }
 
         it 'deletes the victory' do
           expect { subject }.to change(Victory, :count).by(-1)
@@ -255,9 +231,7 @@ RSpec.describe Api::V1::VictoriesController do
 
         subject { xhr :delete, :destroy, id: victory.id }
 
-        it 'returns a 403 response status' do
-          expect(subject.status).to eq 403
-        end
+        it { is_expected.to respond_with_status 403 }
       end
     end
   end

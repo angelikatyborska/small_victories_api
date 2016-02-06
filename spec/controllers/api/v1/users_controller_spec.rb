@@ -4,26 +4,19 @@ RSpec.describe Api::V1::UsersController do
 
     subject { xhr :get, :index }
 
-    it 'returns a 200 response status' do
-      expect(subject.status).to eq 200
-    end
-
     it 'returns all users' do
       expect(JSON.parse(subject.body).length).to eq users.length
     end
 
-    it 'includes only the right keys' do
-      expect(JSON.parse(subject.body)[0].keys).to match_array ['id', 'nickname']
-    end
+    it { is_expected.to respond_with_status 200 }
+    it { is_expected.to respond_with_keys [:id, :nickname] }
   end
 
   describe '#show' do
     context 'user doesn\'t exist' do
       subject { xhr :get, :show, nickname: 'does_not_exist' }
 
-      it 'returns a 404 response status' do
-        expect(subject.status).to eq 404
-      end
+      it { is_expected.to respond_with_status 404 }
     end
 
     context 'user exists' do
@@ -33,13 +26,8 @@ RSpec.describe Api::V1::UsersController do
 
       subject { xhr :get, :show, nickname: user.nickname }
 
-      it 'returns a 200 response status' do
-        expect(subject.status).to eq 200
-      end
-
-      it 'includes only the right keys' do
-        expect(JSON.parse(subject.body).keys).to match_array ['id', 'nickname', 'email', 'victories', 'votes']
-      end
+      it { is_expected.to respond_with_status 200 }
+      it { is_expected.to respond_with_keys [:id, :nickname, :email, :victories, :votes] }
 
       it 'returns the user with correct data' do
         parsed_response = JSON.parse(subject.body)
