@@ -4,8 +4,5 @@ class Victory < ActiveRecord::Base
 
   validates :body, presence: true
   validates :user, presence: true
-
-  def votes_count
-    votes.inject(0) { |count, vote| count + vote.value }
-  end
+  validates :rating, presence: true
 end

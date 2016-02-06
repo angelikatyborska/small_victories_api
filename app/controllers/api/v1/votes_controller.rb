@@ -1,10 +1,10 @@
 class Api::V1::VotesController < Api::V1::ApplicationController
   def index
-    @victory =  Victory.find(params[:victory_id])
+    @victory =  Victory.includes(votes: [:user, { victory: :votes }]).find(params[:victory_id])
 
     not_found if @victory.nil?
 
-    @votes = @victory.votes.includes(:user)
+    @votes = @victory.votes
 
     render json: ActiveModel::ArraySerializer.new(
       @votes,

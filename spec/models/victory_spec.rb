@@ -4,6 +4,7 @@ RSpec.describe Victory do
   describe 'validations' do
     it { is_expected.to validate_presence_of :body }
     it { is_expected.to validate_presence_of :user }
+    it { is_expected.to validate_presence_of :rating }
   end
 
   describe 'associations' do
@@ -13,12 +14,13 @@ RSpec.describe Victory do
 
   describe 'database columns' do
     it { is_expected.to have_db_column(:body).of_type(:text).with_options(null: false) }
+    it { is_expected.to have_db_column(:rating).of_type(:integer).with_options(null: false, default: 0) }
   end
 
-  describe '#votes_count' do
+  describe '#rating' do
     let!(:victory) { create :victory }
 
-    subject { victory.votes_count }
+    subject { victory.rating }
 
     context 'with no votes' do
       it { is_expected.to eq 0 }

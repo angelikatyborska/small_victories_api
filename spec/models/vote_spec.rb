@@ -26,4 +26,27 @@ RSpec.describe Vote do
     it { is_expected.to belong_to :user }
     it { is_expected.to belong_to :victory }
   end
+
+  describe '#destroy' do
+    let!(:victory) { create :victory }
+    let!(:vote) { create :vote, victory: victory, value: -1 }
+
+    it 'updates victory rating' do
+      expect(victory.reload.rating).to eq -1
+      vote.destroy
+      expect(victory.reload.rating).to eq 0
+    end
+  end
+
+  describe '#save' do
+    let!(:victory) { create :victory }
+    let!(:vote) { create :vote, victory: victory, value: -1 }
+
+    it 'updates victory rating' do
+      expect(victory.reload.rating).to eq -1
+      vote.value = 1
+      vote.save
+      expect(victory.reload.rating).to eq 1
+    end
+  end
 end
