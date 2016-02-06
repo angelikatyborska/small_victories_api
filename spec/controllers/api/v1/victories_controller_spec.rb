@@ -121,10 +121,20 @@ RSpec.describe Api::V1::VictoriesController do
     describe 'finding by user' do
       let!(:victories) { create_list :victory, 15 }
 
-      subject { xhr :get, :index, per_page: 10, user_id: victories[0].user.id }
+      context 'user exists' do
+        subject { xhr :get, :index, per_page: 10, user: victories[0].user.nickname }
 
-      it 'only finds victories submitted by the user' do
-        expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to match_array [victories[0].id]
+        it 'only finds victories submitted by the user' do
+          expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to match_array [victories[0].id]
+        end
+      end
+
+      context 'user doesn\'t exist' do
+        subject { xhr :get, :index, per_page: 10, user: 'invalid_nickname' }
+
+        it 'finds nothing' do
+          expect(JSON.parse(subject.body).map { |victory| victory['id'] }).to match_array []
+        end
       end
     end
   end

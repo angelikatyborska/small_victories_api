@@ -5,8 +5,9 @@ class Api::V1::VictoriesController < Api::V1::ApplicationController
     order = sort_params(Victory)
     where = {}
 
-    if params[:user_id]
-      where = { user_id: params[:user_id] }
+    if params[:user]
+      user = User.find_by(nickname: params[:user])
+      where = user ? { user_id: user.id } : { user_id: nil }
     end
 
     @victories = Victory
