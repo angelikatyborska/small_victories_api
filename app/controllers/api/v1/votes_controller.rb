@@ -1,4 +1,6 @@
 class Api::V1::VotesController < Api::V1::ApplicationController
+  include Api::V1::VotesDoc
+
   def index
     @victory =  Victory.includes(votes: [:user, { victory: :votes }]).find(params[:victory_id])
 
@@ -17,7 +19,7 @@ class Api::V1::VotesController < Api::V1::ApplicationController
 
     not_found if @victory.nil?
 
-    @vote = @victory.votes.new(vote_params)
+    @vote = @victory.votes.new(create_vote_params)
 
     if authorize_user!(@vote.user)
       if @vote.save
@@ -36,7 +38,7 @@ class Api::V1::VotesController < Api::V1::ApplicationController
     @vote = @victory.votes.find(params[:id])
 
     if authorize_user!(@vote.user)
-      if @vote.update_attributes(vote_params)
+      if @vote.update_attributes(update_vote_params)
         render json: Api::V1::VoteSerializer.new(@vote).to_json
       else
         render json: Api::V1::ErrorsSerializer.new(@vote.errors).to_json, status: 422
@@ -60,7 +62,11 @@ class Api::V1::VotesController < Api::V1::ApplicationController
 
   private
 
-  def vote_params
+  def create_vote_params
     params.require(:vote).permit(:user_id, :victory_id, :value)
+  end
+
+  def update_vote_params
+    params.require(:vote).permit(:value)
   end
 end

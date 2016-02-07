@@ -4,7 +4,7 @@ RSpec.describe Api::V1::UsersController do
 
     subject { xhr :get, :index }
 
-    it 'returns all users' do
+    it 'returns all users', :show_in_doc do
       expect(JSON.parse(subject.body).length).to eq users.length
     end
 
@@ -29,7 +29,7 @@ RSpec.describe Api::V1::UsersController do
       it { is_expected.to respond_with_status 200 }
       it { is_expected.to respond_with_keys [:id, :nickname, :email, :victories, :votes] }
 
-      it 'returns the user with correct data' do
+      it 'returns the user with correct data', :show_in_doc do
         parsed_response = JSON.parse(subject.body)
 
         expect(parsed_response['id']).to eq user.id

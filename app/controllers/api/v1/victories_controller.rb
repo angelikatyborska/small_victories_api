@@ -1,4 +1,6 @@
 class Api::V1::VictoriesController < Api::V1::ApplicationController
+  include Api::V1::VictoriesDoc
+
   after_action only: [:index] { set_pagination_headers(:victories) }
 
   def index

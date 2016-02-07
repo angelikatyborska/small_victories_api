@@ -1,4 +1,6 @@
 class Api::V1::UsersController < Api::V1::ApplicationController
+  include Api::V1::UsersDoc
+
   def index
     @users = User.all
 

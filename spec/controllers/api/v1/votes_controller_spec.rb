@@ -16,7 +16,7 @@ RSpec.describe Api::V1::VotesController do
     context 'victory exists' do
       subject { xhr :get, :index, victory_id: victory.id }
 
-      it { is_expected.to respond_with_status 200 }
+      it '', :show_in_doc do is_expected.to respond_with_status 200 end
       it { is_expected.to respond_with_records votes.map(&:id) }
       it { is_expected.to respond_with_keys [:id, :value, { user: [:id, :nickname] }] }
     end
@@ -43,13 +43,15 @@ RSpec.describe Api::V1::VotesController do
 
           it { is_expected.to respond_with_status 200 }
 
-          it 'creates a new vote' do
+          it 'creates a new vote', :show_in_doc do
             expect { subject }.to change(Vote, :count).by(1)
           end
         end
       end
 
       context 'with invalid params' do
+        before { Apipie.configuration.validate = false }
+
         subject { xhr :post, :create, victory_id: victory.id, vote: { user_id: user.id, value: 0 } }
 
         it { is_expected.to respond_with_status 422 }
@@ -90,17 +92,23 @@ RSpec.describe Api::V1::VotesController do
       context 'vote exists' do
         context 'for the same user' do
           context 'with valid params' do
-            subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: { value: -1 } }
+            let!(:other_user) { create :user }
+            subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: {
+              value: -1, user_id: other_user.id
+            } }
 
             it { is_expected.to respond_with_status 200 }
 
-            it 'changes vote\'s value' do
+            it 'changes vote\'s value, but not user', :show_in_doc do
               subject
               expect(vote.reload.value).to eq -1
+              expect(vote.reload.user_id).to eq user.id
             end
           end
 
           context 'with invalid params' do
+            before { Apipie.configuration.validate = false }
+
             subject { xhr :put, :update, victory_id: vote.victory.id, id: vote.id, vote: { value: 0 } }
 
             it { is_expected.to respond_with_status 422 }
@@ -153,7 +161,7 @@ RSpec.describe Api::V1::VotesController do
 
           it { is_expected.to respond_with_status 204 }
 
-          it 'deletes the vote' do
+          it 'deletes the vote', :show_in_doc do
             expect { subject }.to change(Vote, :count).by(-1)
           end
         end

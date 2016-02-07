@@ -13,7 +13,7 @@ RSpec.describe Api::V1::VictoriesController do
         expect(subject.header['X-Total-Count']).to eq (Kaminari.config.default_per_page * 3).to_s
       end
 
-      it 'returns the first page of latest victories' do
+      it 'returns the first page of latest victories', :show_in_doc do
         is_expected.to respond_with_records(
           Victory
             .order(described_class::DEFAULT_SORT_PARAMS)
@@ -35,7 +35,7 @@ RSpec.describe Api::V1::VictoriesController do
 
       subject { xhr :get, :index, page: 2, per_page: 5 }
 
-      it 'returns the second page of latest victories' do
+      it 'returns the second page of latest victories', :show_in_doc do
         parsed_response = JSON.parse(subject.body)
 
         expect(parsed_response.length).to eq 5
@@ -66,7 +66,7 @@ RSpec.describe Api::V1::VictoriesController do
       context 'valid sort param' do
         subject { xhr :get, :index, sort: '-body,+created_at' }
 
-        it 'returns the first page of sorted victories' do
+        it 'returns the first page of sorted victories', :show_in_doc do
           parsed_response = JSON.parse(subject.body)
 
           expect(parsed_response.length).to eq Kaminari.config.default_per_page
@@ -80,6 +80,8 @@ RSpec.describe Api::V1::VictoriesController do
       end
 
       context 'invalid sort param' do
+        before { Apipie.configuration.validate = false }
+
         context 'without order' do
           subject { xhr :get, :index, sort: 'body' }
 
@@ -118,15 +120,15 @@ RSpec.describe Api::V1::VictoriesController do
       let!(:victories) { create_list :victory, 15 }
 
       context 'user exists' do
-        subject { xhr :get, :index, per_page: 10, user: victories[0].user.nickname }
+        subject { xhr :get, :index, user: victories[0].user.nickname }
 
-        it 'only finds victories submitted by the user' do
+        it 'only finds victories submitted by the user', :show_in_doc do
           is_expected.to respond_with_records [victories[0].id]
         end
       end
 
       context 'user doesn\'t exist' do
-        subject { xhr :get, :index, per_page: 10, user: 'invalid_nickname' }
+        subject { xhr :get, :index, user: 'invalid_nickname' }
 
         it 'finds nothing' do
           is_expected.to respond_with_records []
@@ -149,7 +151,7 @@ RSpec.describe Api::V1::VictoriesController do
 
     it { is_expected.to respond_with_status 200 }
 
-    it 'returns the victory' do
+    it 'returns the victory', :show_in_doc do
       parsed_response = JSON.parse(subject.body)
 
       expect(parsed_response['id']).to eq victory.id
@@ -176,12 +178,14 @@ RSpec.describe Api::V1::VictoriesController do
 
         it { is_expected.to respond_with_status 200 }
 
-        it 'creates a new victory' do
+        it 'creates a new victory', :show_in_doc do
           expect { subject }.to change(Victory, :count).by(1)
         end
       end
 
       context 'with invalid params' do
+        before { Apipie.configuration.validate = false }
+
         subject { xhr :post, :create, victory: { user_id: user.id } }
 
         it { is_expected.to respond_with_status 422 }
@@ -220,7 +224,7 @@ RSpec.describe Api::V1::VictoriesController do
 
         it { is_expected.to respond_with_status 204 }
 
-        it 'deletes the victory' do
+        it 'deletes the victory', :show_in_doc do
           expect { subject }.to change(Victory, :count).by(-1)
         end
       end
