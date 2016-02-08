@@ -1,26 +1,16 @@
 module Api::V1::UsersDoc
-  extend Apipie::DSL::Concern
+  extend Api::V1::BaseDoc
+  namespace '/api/v1'
+  resource :users, formats: ['JSON'], short: 'Site members'
 
-  def self.superclass
-    Api::V1::UsersController
+  doc_for :index do
+    api :GET, '/v1/users', 'Fetch basic data about all users'
   end
 
-  resource_description do
-    resource_id 'Users'
-    short 'Site members'
-    formats ['JSON']
-    api_version '1'
-  end
-
-  api :GET, '/v1/users'
-
-  def index
-  end
-
-  api :GET, '/v1/users/:nickname'
-  param :nickname, String, required: true
-  error code: 404, desc: 'User not found'
-
-  def show
+  doc_for :show do
+    api :GET, '/v1/users/:nickname', 'Fetch detailed data about a user, requires authentication'
+    error code: 404, desc: 'User not found'
+    auth_headers
+    param :nickname, String, required: true
   end
 end
