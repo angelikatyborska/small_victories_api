@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+ruby '2.3.0'
 
 gem 'rails', '4.2.5.1'
 gem 'rails-api'
@@ -13,6 +14,7 @@ gem 'devise_token_auth', '~> 0.1.37'
 gem 'kaminari', '~> 0.16.3'
 gem 'api_pagination_headers', '~> 2.1.1'
 gem 'apipie-rails', '>= 0.3.0'
+gem 'rails_12factor'
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.4.0'
