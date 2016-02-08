@@ -14,7 +14,6 @@ gem 'devise_token_auth', '~> 0.1.37'
 gem 'kaminari', '~> 0.16.3'
 gem 'api_pagination_headers', '~> 2.1.1'
 gem 'apipie-rails', '>= 0.3.0'
-gem 'rails_12factor'
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.4.0'
@@ -31,6 +30,10 @@ group :test do
   gem 'launchy', '~> 2.4.3'
   gem 'shoulda-matchers', '~> 3.0.1'
   gem 'simplecov', '~> 0.11.1', require: false
+end
+
+group :production do
+  gem 'rails_12factor'
 end
 
 # To use ActiveModel has_secure_password
