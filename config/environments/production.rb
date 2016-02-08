@@ -79,7 +79,7 @@ Rails.application.configure do
 
   config.middleware.insert_before 0, 'Rack::Cors' do
     allow do
-      origins 'http://small-victories-front.herokuapp.com'
+      origins /http(s)?:\/\/small-victories-front\.herokuapp\.com/
       resource '*',
         headers: :any,
         methods: [:get, :post, :put, :patch, :delete, :options, :head],
