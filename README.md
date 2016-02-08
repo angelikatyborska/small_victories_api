@@ -1,5 +1,5 @@
 # Small Victories JSON REST API
-A Ruby on Rails app for managing fitness class reservations.
+A Ruby on Rails app for sharing your small victories with the World.
 
 ## Demo
 [Here](https://small-victories-api.herokuapp.com/api/v1/victories).
