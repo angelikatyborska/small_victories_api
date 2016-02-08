@@ -25,7 +25,7 @@ module SmallVictories
 
     config.middleware.insert_before 0, 'Rack::Cors' do
       allow do
-        origins '*'
+        origins 'localhost'
         resource '*',
           headers: :any,
           methods: [:get, :post, :put, :patch, :delete, :options, :head],

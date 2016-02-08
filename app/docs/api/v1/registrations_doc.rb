@@ -12,7 +12,7 @@ module Api::V1::RegistrationsDoc
   end
 
   doc_for :destroy do
-    api :DELETE, '/v1/auth', 'Delete a user, requres authentication'
+    api :DELETE, '/v1/auth', 'Delete a user, requires authentication'
     auth_headers
   end
 end
