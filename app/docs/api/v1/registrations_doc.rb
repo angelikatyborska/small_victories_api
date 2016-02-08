@@ -10,4 +10,9 @@ module Api::V1::RegistrationsDoc
     param :password_confirmation, String, required: true
     param :nickname, String, required: true
   end
+
+  doc_for :destroy do
+    api :DELETE, '/v1/auth', 'Delete a user, requres authentication'
+    auth_headers
+  end
 end
