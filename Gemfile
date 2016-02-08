@@ -13,7 +13,6 @@ gem 'devise_token_auth', '~> 0.1.37'
 gem 'kaminari', '~> 0.16.3'
 gem 'api_pagination_headers', '~> 2.1.1'
 gem 'apipie-rails', '>= 0.3.0'
-gem 'mailcatcher'
 
 group :development, :test do
   gem 'rspec-rails', '~> 3.4.0'
@@ -23,6 +22,7 @@ end
 
 group :development do
   gem 'spring'
+  gem 'mailcatcher'
 end
 
 group :test do
