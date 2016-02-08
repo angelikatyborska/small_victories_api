@@ -4,6 +4,9 @@ A Ruby on Rails app for managing fitness class reservations.
 ## Demo
 [Here](https://small-victories-api.herokuapp.com/api/v1/victories).
 
+Sign in as `userX@example.com` with password `password`, where X is an integer between 0 and 29.
+
+
 ### Documentation
 [Here](https://small-victories-api.herokuapp.com/apidoc).
 
